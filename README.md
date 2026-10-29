@@ -2,7 +2,20 @@
 
 **English** | [繁體中文](README.zh-TW.md)
 
-**A Windows tray tool that brings your File Explorer windows and tabs back exactly as they were, after Explorer crashes, the PC shuts down uncleanly, or you close a window by mistake. You don't have to change how you work.**
+Brings your File Explorer windows and tabs back after a crash, an unclean shutdown, or an accidental close.
+
+## Contents
+
+- [Why this exists](#why-this-exists)
+- [Getting started](#getting-started)
+- [Usage](#usage)
+- [How it works](#how-it-works)
+- [Known limitations](#known-limitations)
+- [Development](#development)
+- [Getting help](#getting-help)
+- [License](#license)
+
+---
 
 ## Why this exists
 
@@ -27,9 +40,30 @@ Windows does have "Restore previous folder windows at logon", but it only kicks 
 
 ---
 
-## 1. What you'll see in each situation
+## Getting started
 
-**The File Explorer icon in the system tray is the only entry point. If it is in the tray, recording is running.**
+**Build it once, start it once, and from then on it runs by itself at every sign-in.**
+
+**Requirements**: Windows 11 with tabbed File Explorer (developed on 25H2). Nothing to install: it builds with the .NET Framework compiler that ships with Windows.
+
+```powershell
+git clone https://github.com/chuanchihsu1219/explorer-session.git
+cd explorer-session
+powershell -ExecutionPolicy Bypass -File .\build.ps1
+explorer.exe "$PWD\bin\ExplorerSession.exe"
+```
+
+- A File Explorer icon appears in the system tray. It may land in the hidden area (`^`); drag it onto the taskbar if you want it always visible.
+- The first run turns on **Start at sign-in** and adds a **Restore File Explorer** shortcut to the Start menu.
+- That's it. There is nothing to configure.
+
+---
+
+## Usage
+
+**You don't have to change how you work: the tray icon is the only entry point, and if it is in the tray, recording is running.**
+
+### What you'll see in each situation
 
 | Situation | What you see | What you do |
 |---|---|---|
@@ -50,13 +84,11 @@ Windows does have "Restore previous folder windows at logon", but it only kicks 
 | Recently closed ▸ | The last 20 closed windows or tabs; pick any one |
 | Restore from history ▸ | Saved points in time; ⚠ marks "before crash" or "before unclean shutdown" |
 | Pause recording | Stop recording for a while, e.g. while you tidy up lots of windows |
-| Start at sign-in | **On by default.** Runs in the background after you sign in, and adds a "Restore File Explorer" shortcut to the Start menu. Untick it to stop starting automatically |
+| Start at sign-in | **On by default.** Runs in the background after you sign in, and keeps the "Restore File Explorer" shortcut in the Start menu. Untick it to stop starting automatically |
 | Open data folder | Opens the runtime folder, where you can read `log.txt` |
 | Exit | Closes the tool and records a clean exit |
 
----
-
-## 2. If the tool gets closed
+### If the tool gets closed
 
 **Press Start, search for "Restore File Explorer", and click it. That starts the tool again.**
 
@@ -83,7 +115,7 @@ Windows does have "Restore previous folder windows at logon", but it only kicks 
 
 ---
 
-## 3. How recording works: "current state" and "history" are separate
+## How it works
 
 **Every 15 seconds the tool reads all Explorer tabs. Switching folders only updates the current state. History is written only when the set of windows and tabs changes and then stays the same for 2 minutes.**
 
@@ -104,10 +136,11 @@ Windows does have "Restore previous folder windows at logon", but it only kicks 
 | ⚠ Before crash, before unclean shutdown, before shutdown | 30 days |
 
 - **After a crash, only the "before crash" state is restored**: each snapshot records which Explorer run it belongs to. Windows you open after the crash belong to the new run and are never used for the restore.
+- **Explorer restarts are detected through the `TaskbarCreated` broadcast**: the tray icon needs that message anyway to re-register, so there is no need to watch the event log.
 
 ---
 
-## 4. Known limitations
+## Known limitations
 
 - **A window closed within 15 seconds of opening** has not been recorded yet, so it cannot be reopened.
 - **Search result tabs**: only a display name is available, not a path, so they are skipped.
@@ -116,25 +149,29 @@ Windows does have "Restore previous folder windows at logon", but it only kicks 
 
 ---
 
-## 5. Install and maintenance
+## Development
 
 | Task | Command (PowerShell in this folder) |
 |---|---|
-| First use | `.\build.ps1`, then `explorer.exe "$PWD\bin\ExplorerSession.exe"`. The first run turns on "Start at sign-in" |
 | Rebuild after changing the code | `bin\ExplorerSession.exe --quit`, then `.\build.ps1` |
 | Print one snapshot | `bin\ExplorerSession.exe --snapshot-once out.json` |
 | Restore from a given file | `bin\ExplorerSession.exe --restore some.json` |
 | Simulate an Explorer restart / sign-in after an unclean shutdown | `--simulate-shell-restart` / `--simulate-unclean-logon` (run by the resident instance) |
 
+- **Source** is in `src\` (C#, .NET Framework 4.x, no NuGet packages).
 - **Language**: the UI is Traditional Chinese when the Windows display language is zh-TW, zh-HK or zh-MO, and English otherwise. To force one, set the environment variable `EXPLORER_SESSION_LANG=zh` or `en`.
-- **No SDK needed**: it builds with the .NET Framework `csc.exe` that ships with Windows. Source is in `src\`.
-- **Requirements**: Windows 11 with tabbed File Explorer (developed on 25H2).
-- **Runtime data** lives in `%LOCALAPPDATA%\ExplorerSession\`. It is deliberately not in OneDrive, because it is written every 15 seconds.
+- **Runtime data** lives in `%LOCALAPPDATA%\ExplorerSession\`. It is deliberately not in OneDrive or other synced folders, because it is written every 15 seconds.
 - **Start it through `explorer.exe`**:
   - Started from a terminal inside an MSIX-packaged app (such as Claude Desktop), it becomes a child of that app and is killed when the app restarts.
   - Its `AppData` writes are also redirected to that app's private copy.
 - **Start at sign-in** writes `HKCU\...\Run\ExplorerSession`. No scheduled task or admin rights needed.
-- **Explorer restarts are detected through the `TaskbarCreated` broadcast**: the tray icon needs that message anyway to re-register, so there is no need to watch the event log.
+
+---
+
+## Getting help
+
+- **Bugs and questions**: [open an issue](https://github.com/chuanchihsu1219/explorer-session/issues). Please attach `log.txt` (right-click the tray icon → "Open data folder"), which records every restore and its result.
+- **Contributions**: pull requests are welcome. For anything larger than a small fix, open an issue first so we can agree on the approach.
 
 ---
 
