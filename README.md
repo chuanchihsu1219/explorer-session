@@ -135,3 +135,9 @@ Windows does have "Restore previous folder windows at logon", but it only kicks 
   - Its `AppData` writes are also redirected to that app's private copy.
 - **Start at sign-in** writes `HKCU\...\Run\ExplorerSession`. No scheduled task or admin rights needed.
 - **Explorer restarts are detected through the `TaskbarCreated` broadcast**: the tray icon needs that message anyway to re-register, so there is no need to watch the event log.
+
+---
+
+## License
+
+[MIT](LICENSE) © 2026 Chuan-Chi Hsu
