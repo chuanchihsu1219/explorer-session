@@ -4,11 +4,26 @@
 
 **A Windows tray tool that brings your File Explorer windows and tabs back exactly as they were, after Explorer crashes, the PC shuts down uncleanly, or you close a window by mistake. You don't have to change how you work.**
 
-- **Crash or unclean shutdown**: restored automatically, nothing to click.
-- **Closed something by mistake**: click the tray icon once.
-- **Want an earlier layout back**: pick a point in time from the right-click menu.
+## Why this exists
 
-Windows' own "Restore previous folder windows at logon" only covers a clean sign-out or shutdown. This tool covers everything else.
+**When you juggle several projects at once, your open folders are your to-do list, and Windows can throw that list away without warning.**
+
+Picture an ordinary afternoon. One window holds the client deck, another the data pipeline with five subfolder tabs, and somewhere at the back sits the side project you haven't touched since Tuesday. Then File Explorer crashes. In our case it had been running for two weeks and quietly leaked graphics resources until it fell over. The taskbar flickers, and every folder window is gone.
+
+- **The urgent work comes back**, because you remember it and dig the folders up again.
+- **The side project doesn't come back**, because that open window was the only reminder it existed. Out of sight, out of mind.
+
+Windows does have "Restore previous folder windows at logon", but it only kicks in after a clean restart or sign-out. A crash, a power cut, running out of memory, or one careless click on ✕ all leave you with nothing.
+
+**Explorer Session closes that gap:**
+
+| What happened | Windows on its own | With Explorer Session |
+|---|---|---|
+| Clean restart, shutdown or sign-out | ✅ Restored | ✅ Restored (Windows does it; this tool stays out of the way) |
+| File Explorer crashes or restarts | ❌ Everything gone | ✅ Restored automatically within seconds |
+| Unclean shutdown (out of memory, power loss) | ❌ Everything gone | ✅ Restored automatically after sign-in |
+| You close a window or tab by mistake | ❌ Gone | ✅ One click on the tray icon, like Ctrl+Shift+T in a browser |
+| "What did I have open yesterday morning?" | ❌ No way to know | ✅ Pick a point in time from the history menu |
 
 ---
 
