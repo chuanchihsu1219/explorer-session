@@ -1,90 +1,122 @@
-# 檔案總管保存（explorer-session）
+# Explorer Session
 
-**檔案總管當掉、不正常關機或誤關視窗之後，可以把資料夾視窗和分頁照原樣找回來，你不需要改變任何操作習慣。**
+**English** | [繁體中文](README.zh-TW.md)
 
-- **當掉、不正常關機**：自動還原，不用按任何東西。
-- **誤關**：點一下系統匣圖示就找回來。
-- **想回到更早的狀態**：右鍵選單裡挑一個時間點。
+**A Windows tray tool that brings your File Explorer windows and tabs back exactly as they were, after Explorer crashes, the PC shuts down uncleanly, or you close a window by mistake. You don't have to change how you work.**
+
+- **Crash or unclean shutdown**: restored automatically, nothing to click.
+- **Closed something by mistake**: click the tray icon once.
+- **Want an earlier layout back**: pick a point in time from the right-click menu.
+
+Windows' own "Restore previous folder windows at logon" only covers a clean sign-out or shutdown. This tool covers everything else.
 
 ---
 
-## 一、各種情況下你會遇到什麼
+## 1. What you'll see in each situation
 
-**系統匣圖示（檔案總管的圖示）是唯一的入口。它在系統匣裡，就代表正在記錄。**
+**The File Explorer icon in the system tray is the only entry point. If it is in the tray, recording is running.**
 
-| 情況 | 你會看到 | 你要做的 |
+| Situation | What you see | What you do |
 |---|---|---|
-| 檔案總管當掉或重開 | 工作列閃一下。幾秒後原本的視窗一個個開回來，分頁、位置、選中的分頁都跟原本一樣，右下角會跳通知 | 不用做。就算先按了工作列圖示也沒關係，只是多一個首頁視窗 |
-| 正常重開機、關機、登出 | Windows 內建功能會還原，本工具不介入 | 不用做 |
-| 不正常關機（記憶體耗盡、斷電、強制關機） | 登入後大約半分鐘，視窗自動回來 | 不用做 |
-| 誤關一個視窗或分頁 | — | **左鍵點系統匣圖示**。每按一次往前找回一個，跟 Chrome 的 Ctrl+Shift+T 一樣 |
-| 想回到某個時間點的視窗組合 | — | 右鍵 →「從歷史還原」→ 挑一筆 |
+| File Explorer crashes or restarts | The taskbar flickers. A few seconds later your windows reopen one by one, with the same tabs, positions and selected tabs, and a notification appears | Nothing. Clicking the taskbar icon first is fine too; you just get one extra Home window |
+| Normal restart, shutdown or sign-out | Windows' built-in restore handles it; this tool stays out of the way | Nothing |
+| Unclean shutdown (out of memory, power loss, forced shutdown) | About half a minute after sign-in, your windows come back | Nothing |
+| You closed a window or tab by mistake | — | **Left-click the tray icon.** Each click reopens one more, like Ctrl+Shift+T in Chrome |
+| You want the windows from a certain time | — | Right-click → "Restore from history" → pick an entry |
 
-- **已經開著的資料夾一律跳過**，不會重複開。
-- **系統匣圖示不見了**：代表程式沒在跑。點開始功能表的「還原檔案總管」會重新啟動它。
+- **Folders that are already open are always skipped**, so nothing is opened twice.
 
-### 右鍵選單
+### Right-click menu
 
-| 項目 | 作用 |
+| Item | What it does |
 |---|---|
-| 上次快照 HH:mm:ss · N 窗 M 頁 | 狀態列；時間有在更新，就代表正在記錄 |
-| 找回最近關閉的（同左鍵） | 同左鍵 |
-| 最近關閉 ▸ | 最近 20 筆關閉的視窗或分頁，可以直接挑一個 |
-| 從歷史還原 ▸ | 歷史紀錄，⚠ 標記的是「當掉前」或「不正常關機前」 |
-| 暫停記錄 | 暫時不記錄，例如要整理大量視窗時 |
-| 登入時自動啟動 | 勾選後開機自動執行，並在開始功能表建立「還原檔案總管」捷徑 |
-| 開啟資料夾 | 打開執行期資料夾，可以看 `log.txt` |
-| 結束 | 關掉程式，會記為正常結束 |
+| Last snapshot HH:mm:ss · N windows, M tabs | Status line; if the time keeps moving, recording is running |
+| Reopen last closed (same as left click) | Same as left click |
+| Recently closed ▸ | The last 20 closed windows or tabs; pick any one |
+| Restore from history ▸ | Saved points in time; ⚠ marks "before crash" or "before unclean shutdown" |
+| Pause recording | Stop recording for a while, e.g. while you tidy up lots of windows |
+| Start at sign-in | **On by default.** Runs in the background after you sign in, and adds a "Restore File Explorer" shortcut to the Start menu. Untick it to stop starting automatically |
+| Open data folder | Opens the runtime folder, where you can read `log.txt` |
+| Exit | Closes the tool and records a clean exit |
 
 ---
 
-## 二、怎麼記錄：「目前狀態」和「歷史紀錄」兩層
+## 2. If the tool gets closed
 
-**每 15 秒讀一次。切換資料夾只更新目前狀態，只有視窗或分頁的組成變了、而且穩定 2 分鐘，才寫進歷史紀錄。**
+**Press Start, search for "Restore File Explorer", and click it. That starts the tool again.**
 
-| 層 | 檔案 | 記什麼 | 用在哪 |
+**How to tell it is not running**
+- The tray icon is gone. It may be in the hidden area, so expand `^` too.
+- The "Last snapshot" time in the right-click menu stops moving.
+
+**Ways to start it again**
+
+| Way | When |
+|---|---|
+| **Start menu → "Restore File Explorer"** | The quickest way |
+| Restart the PC | With "Start at sign-in" ticked, it starts by itself after sign-in |
+| Run `bin\ExplorerSession.exe` directly | Fallback if the shortcut was deleted |
+
+- **The same shortcut behaves differently depending on whether the tool is running**:
+  - Not running: it starts the tool, without restoring anything.
+  - Already running: it acts like a left click on the tray icon and reopens the most recently closed window or tab.
+  - Only one copy ever runs, so clicking it can never start a second one.
+
+**What happens while it is closed**
+- **Everything already saved is kept**: history and "Recently closed" live on disk and work again once the tool restarts.
+- **Nothing is recorded while it is closed**: if Explorer crashes during that time, there is no automatic restore. After restarting the tool, you can still pick the last snapshot from before it was closed under "Restore from history".
+
+---
+
+## 3. How recording works: "current state" and "history" are separate
+
+**Every 15 seconds the tool reads all Explorer tabs. Switching folders only updates the current state. History is written only when the set of windows and tabs changes and then stays the same for 2 minutes.**
+
+| Layer | File | What it holds | Used for |
 |---|---|---|---|
-| 目前狀態 | `live.json` | 每個分頁**現在**所在的資料夾、位置、選中的分頁 | 當掉、不正常關機後的自動還原 |
-| 最近關閉 | `closed.json` | 最近 20 筆真正被關掉的視窗或分頁 | 左鍵、「最近關閉」 |
-| 歷史紀錄 | `history\*.json` | 組成穩定的時間點，加上當掉前、關機前的檢查點 | 「從歷史還原」 |
+| Current state | `live.json` | The folder each tab is in **right now**, plus positions and selected tabs | Automatic restore after a crash or unclean shutdown |
+| Recently closed | `closed.json` | The last 20 windows or tabs that were really closed | Left click, "Recently closed" |
+| History | `history\*.json` | Points where the layout was stable, plus checkpoints before a crash or shutdown | "Restore from history" |
 
-- **分頁靠「分頁本身」辨認，不靠路徑**：每個分頁有一個專屬的內部視窗代號，切換資料夾不會改變。所以在子資料夾之間切來切去，不會被當成「關閉分頁」，也不會洗掉歷史紀錄。
-- **歷史紀錄的保留規則**：
+- **Tabs are recognized by the tab itself, not by its path**: each tab has its own internal window handle, which does not change when it navigates. Moving between subfolders is therefore never mistaken for closing a tab, and it does not flood the history.
+- **History retention**:
 
-| 距今 | 保留 |
+| Age | Kept |
 |---|---|
-| 1 小時內 | 全部 |
-| 1–24 小時 | 每 15 分鐘留最後一份 |
-| 1–7 天 | 每天留最後一份 |
-| ⚠ 當掉前、不正常關機前、關機前 | 30 天 |
+| Under 1 hour | All |
+| 1–24 hours | The last one in each 15-minute slot |
+| 1–7 days | The last one each day |
+| ⚠ Before crash, before unclean shutdown, before shutdown | 30 days |
 
-- **當掉後只會還原「當掉前」那一份**：每份快照都記錄它屬於哪一次檔案總管執行。當掉後新開的視窗屬於新的一次執行，不會被拿去還原。
+- **After a crash, only the "before crash" state is restored**: each snapshot records which Explorer run it belongs to. Windows you open after the crash belong to the new run and are never used for the restore.
 
 ---
 
-## 三、已知限制
+## 4. Known limitations
 
-- **開啟不到 15 秒就關掉的視窗**：還沒被記到，所以找不回來。
-- **搜尋結果分頁**：記到的只是顯示名稱，不是路徑，所以會跳過。
-- **「新增分頁」用的是 Windows 沒有公開文件的指令**：哪天 Windows 更新讓它失效，其餘分頁會改成各開一個視窗，`log.txt` 會寫 `new-tab failed`。
-- **同一個視窗裡有兩個同名分頁時**：選中的分頁、分頁順序可能對調。
+- **A window closed within 15 seconds of opening** has not been recorded yet, so it cannot be reopened.
+- **Search result tabs**: only a display name is available, not a path, so they are skipped.
+- **Adding tabs uses an undocumented Explorer command**: if a Windows update breaks it, the remaining tabs open as separate windows and `log.txt` says `new-tab failed`.
+- **Two tabs with the same name in one window**: the selected tab or tab order may come back swapped.
 
 ---
 
-## 四、維護
+## 5. Install and maintenance
 
-| 要做 | 指令（在本資料夾的 PowerShell） |
+| Task | Command (PowerShell in this folder) |
 |---|---|
-| 改程式後重新編譯 | 先 `bin\ExplorerSession.exe --quit`，再 `.\build.ps1` |
-| 啟動 | `explorer.exe "$PWD\bin\ExplorerSession.exe"` |
-| 印一次快照 | `bin\ExplorerSession.exe --snapshot-once out.json` |
-| 用指定檔案還原 | `bin\ExplorerSession.exe --restore some.json` |
-| 模擬檔案總管重開／不正常關機後登入 | `--simulate-shell-restart`／`--simulate-unclean-logon`（交給常駐程式執行） |
+| First use | `.\build.ps1`, then `explorer.exe "$PWD\bin\ExplorerSession.exe"`. The first run turns on "Start at sign-in" |
+| Rebuild after changing the code | `bin\ExplorerSession.exe --quit`, then `.\build.ps1` |
+| Print one snapshot | `bin\ExplorerSession.exe --snapshot-once out.json` |
+| Restore from a given file | `bin\ExplorerSession.exe --restore some.json` |
+| Simulate an Explorer restart / sign-in after an unclean shutdown | `--simulate-shell-restart` / `--simulate-unclean-logon` (run by the resident instance) |
 
-- **編譯不需要安裝 SDK**：用 Windows 內建的 .NET Framework `csc.exe`。原始碼在 `src\`。
-- **執行期資料**在 `%LOCALAPPDATA%\ExplorerSession\`。刻意不放 OneDrive，因為每 15 秒寫一次，會一直觸發同步。
-- **一定要用 `explorer.exe` 啟動**：
-  - 從 Claude Desktop 的終端機直接執行，程式會掛在 Claude 底下，Claude 一重啟就被一起收掉。
-  - 它寫的 `AppData` 也會被導到 Claude 的私有副本。
-- **啟動方式**：「登入時自動啟動」寫的是 `HKCU\...\Run\ExplorerSession`。不用排程工作，也不需要管理員權限。
-- **偵測檔案總管重開，靠的是它重開時廣播的 `TaskbarCreated` 訊息**：常駐程式本來就要靠這個訊息把圖示掛回去，所以不必另外監看事件記錄。
+- **Language**: the UI is Traditional Chinese when the Windows display language is zh-TW, zh-HK or zh-MO, and English otherwise. To force one, set the environment variable `EXPLORER_SESSION_LANG=zh` or `en`.
+- **No SDK needed**: it builds with the .NET Framework `csc.exe` that ships with Windows. Source is in `src\`.
+- **Requirements**: Windows 11 with tabbed File Explorer (developed on 25H2).
+- **Runtime data** lives in `%LOCALAPPDATA%\ExplorerSession\`. It is deliberately not in OneDrive, because it is written every 15 seconds.
+- **Start it through `explorer.exe`**:
+  - Started from a terminal inside an MSIX-packaged app (such as Claude Desktop), it becomes a child of that app and is killed when the app restarts.
+  - Its `AppData` writes are also redirected to that app's private copy.
+- **Start at sign-in** writes `HKCU\...\Run\ExplorerSession`. No scheduled task or admin rights needed.
+- **Explorer restarts are detected through the `TaskbarCreated` broadcast**: the tray icon needs that message anyway to re-register, so there is no need to watch the event log.

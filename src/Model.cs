@@ -10,8 +10,8 @@ namespace ExplorerSession
 {
     public class TabState
     {
-        public long Id { get; set; }          // ShellTabWindowClass 代號；只在同一次檔案總管執行內有意義
-        public string Path { get; set; }      // 檔案系統路徑，或 ::{CLSID}
+        public long Id { get; set; }          // ShellTabWindowClass handle; only meaningful within one Explorer run
+        public string Path { get; set; }      // file system path, or ::{CLSID}
         public string Name { get; set; }
     }
 
@@ -20,8 +20,8 @@ namespace ExplorerSession
         public long Hwnd { get; set; }
         public List<TabState> Tabs { get; set; }
         public int ShowCmd { get; set; }
-        public int[] Rect { get; set; }       // normal position（per-monitor v2 實體像素）
-        public int Selected { get; set; }     // Tabs 內的索引
+        public int[] Rect { get; set; }       // normal position (per-monitor v2 physical pixels)
+        public int Selected { get; set; }     // index into Tabs
         public WindowState() { Tabs = new List<TabState>(); }
     }
 
@@ -36,14 +36,14 @@ namespace ExplorerSession
 
         public int TabCount { get { return Windows.Sum(w => w.Tabs.Count); } }
 
-        /// <summary>組成簽章：只看視窗與分頁的身分，不看路徑。</summary>
+        /// <summary>Composition signature: window and tab identities only, not paths.</summary>
         public string Signature()
         {
             return string.Join(";", Windows.OrderBy(w => w.Hwnd).Select(w =>
                 w.Hwnd + ":" + string.Join(",", w.Tabs.Select(t => t.Id).OrderBy(i => i))));
         }
 
-        /// <summary>內容鍵：路徑、順序、選中分頁、位置；用來判斷 live.json 要不要覆寫。</summary>
+        /// <summary>Content key: paths, order, selected tab, placement; decides whether live.json is rewritten.</summary>
         public string ContentKey()
         {
             var sb = new StringBuilder();
@@ -60,7 +60,7 @@ namespace ExplorerSession
         public static string Summary(IEnumerable<WindowState> windows, int maxNames)
         {
             var names = windows.SelectMany(w => w.Tabs).Select(t => t.Name).Where(n => !string.IsNullOrEmpty(n)).Distinct().ToList();
-            string s = string.Join("、", names.Take(maxNames));
+            string s = string.Join(L.T("、", ", "), names.Take(maxNames));
             if (names.Count > maxNames) s += "…";
             return s;
         }
@@ -70,7 +70,7 @@ namespace ExplorerSession
     {
         public string Time { get; set; }
         public string Kind { get; set; }      // window / tab
-        public WindowState Window { get; set; }   // kind=tab 時只含那一個分頁，Hwnd 是原本所在的視窗
+        public WindowState Window { get; set; }   // for kind=tab: only that tab, and Hwnd is the window it was in
     }
 
     public class SessionInfo
@@ -144,11 +144,11 @@ namespace ExplorerSession
             return list.OrderByDescending(e => e.Time).ToList();
         }
 
-        /// <summary>保留規則：1 小時內全留；1–24 小時每 15 分鐘留最後一份；1–7 天每天留最後一份；釘選的留 30 天。</summary>
+        /// <summary>Retention: keep all within 1 h; the last per 15 min for 1–24 h; the last per day for 1–7 days; pinned ones 30 days.</summary>
         public static void Prune(DateTime now)
         {
             var keepBuckets = new HashSet<string>();
-            foreach (var e in ListHistory())   // 由新到舊，每個區間第一個看到的就是最後一份
+            foreach (var e in ListHistory())   // newest first, so the first one seen in each bucket is its latest
             {
                 var age = now - e.Time;
                 bool keep;

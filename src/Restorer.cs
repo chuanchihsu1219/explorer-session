@@ -19,7 +19,7 @@ namespace ExplorerSession
         }
     }
 
-    /// <summary>還原引擎：所有觸發點共用。已經開著的路徑一律跳過。</summary>
+    /// <summary>Restore engine shared by every trigger. Paths that are already open are always skipped.</summary>
     class Restorer
     {
         readonly ShellReader reader;
@@ -59,7 +59,7 @@ namespace ExplorerSession
             return r;
         }
 
-        /// <summary>把一個分頁加回原本的視窗；原視窗不在了就開新視窗。</summary>
+        /// <summary>Put a tab back into its original window, or open a new window if that window is gone.</summary>
         public RestoreResult RestoreTab(long hwnd, TabState tab)
         {
             var r = new RestoreResult();
@@ -82,7 +82,7 @@ namespace ExplorerSession
             for (int i = 1; i < tabs.Count; i++)
             {
                 if (AddTab(top, tabs[i].Path)) { r.Tabs++; continue; }
-                // 新增分頁指令失效（例如 Windows 更新後）：其餘分頁各開一個視窗，至少資料夾都回得來
+                // The new-tab command stopped working (e.g. after a Windows update): open the remaining tabs as separate windows
                 r.Notes.Add("new-tab failed, falling back to separate windows");
                 for (int j = i; j < tabs.Count; j++)
                 {
@@ -99,10 +99,10 @@ namespace ExplorerSession
         {
             if (string.IsNullOrEmpty(path)) return false;
             if (path.StartsWith("::")) return true;
-            if (!path.Contains("\\")) return false;   // 搜尋結果等：路徑只是顯示字串
+            if (!path.Contains("\\")) return false;   // search results etc.: the path is only a display string
             if (path.StartsWith(@"\\"))
             {
-                // 網路路徑可能離線，檢查最多等 2 秒
+                // a network path may be offline; wait at most 2 seconds
                 var t = Task.Run(() => Directory.Exists(path));
                 return t.Wait(2000) && t.Result;
             }
@@ -114,7 +114,7 @@ namespace ExplorerSession
         long OpenWindow(string path)
         {
             var before = new HashSet<long>(reader.Entries().Select(e => e.Top));
-            // 只有含空白才加引號：磁碟根目錄 C:\ 加了引號會變成 "C:\" 而被當成跳脫字元
+            // Quote only when needed: a quoted drive root "C:\" would read the backslash as an escape
             string arg = Target(path);
             if (arg.Contains(" ")) arg = "\"" + arg + "\"";
             Process.Start(new ProcessStartInfo("explorer.exe", arg) { UseShellExecute = false });
@@ -125,7 +125,7 @@ namespace ExplorerSession
                 var fresh = reader.Entries().FirstOrDefault(e => !before.Contains(e.Top));
                 if (fresh != null)
                 {
-                    // 等第一個分頁載入完成，後面送新增分頁指令才有對象
+                    // wait for the first tab to load so the new-tab command has a target
                     var ready = DateTime.Now.AddSeconds(3);
                     while (fresh.Path == null && DateTime.Now < ready)
                     {

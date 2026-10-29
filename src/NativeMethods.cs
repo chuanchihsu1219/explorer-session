@@ -24,8 +24,8 @@ namespace ExplorerSession
         [PreserveSig] int QueryService(ref Guid sid, ref Guid iid, out IntPtr ppv);
     }
 
-    // 只用到 GetWindow：每個分頁的 IShellBrowser 回傳該分頁專屬的 ShellTabWindowClass，
-    // 切換資料夾時不會變，所以拿來當分頁 ID（2026-10-29 spike 驗證）。
+    // Only GetWindow is used: each tab's IShellBrowser returns that tab's own ShellTabWindowClass,
+    // which does not change when the tab navigates, so it serves as the tab id (verified 2026-10-29).
     [ComImport, Guid("000214E2-0000-0000-C000-000000000046"), InterfaceType(ComInterfaceType.InterfaceIsIUnknown)]
     interface IShellBrowser_
     {
@@ -35,7 +35,7 @@ namespace ExplorerSession
     static class Native
     {
         public const uint WM_COMMAND = 0x0111;
-        // Explorer 內部的「新增分頁」指令，沒有官方文件；失效時還原引擎會改成各開一個視窗。
+        // Explorer's internal "new tab" command; undocumented. If it stops working the restorer opens separate windows.
         public const int CMD_NEW_TAB = 0xA21B;
 
         [DllImport("user32.dll")] public static extern bool GetWindowPlacement(IntPtr h, ref WINDOWPLACEMENT p);
@@ -53,7 +53,7 @@ namespace ExplorerSession
 
         static readonly Guid SID_STopLevelBrowser = new Guid("4C96BE40-915C-11CF-99D3-00AA004AE837");
 
-        /// <summary>分頁 ID：該分頁的 ShellTabWindowClass 視窗代號；取不到回 0。</summary>
+        /// <summary>Tab id: the tab's ShellTabWindowClass handle, or 0 if unavailable.</summary>
         public static long TabHandle(object webBrowser)
         {
             var sp = webBrowser as IServiceProvider_;
@@ -83,7 +83,7 @@ namespace ExplorerSession
 
         static DateTime? bootTime;
 
-        /// <summary>開機時間取 WMI 的 LastBootUpTime：用 GetTickCount64 推算會跟實際差好幾分鐘（實測 14 天差 5 分鐘）。</summary>
+        /// <summary>Boot time from WMI LastBootUpTime: deriving it from GetTickCount64 drifted 5 minutes over 14 days of uptime.</summary>
         public static DateTime BootTime()
         {
             if (bootTime == null)

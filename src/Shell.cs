@@ -5,17 +5,17 @@ using System.Windows.Automation;
 
 namespace ExplorerSession
 {
-    /// <summary>一筆殼層視窗清單項目＝一個分頁。</summary>
+    /// <summary>One entry of the shell windows list = one tab.</summary>
     class TabEntry
     {
-        public object Com;       // IWebBrowser2（dynamic 呼叫用）
+        public object Com;       // IWebBrowser2 (called through dynamic)
         public long Top;
         public long Id;
         public string Path;
         public string Name;
     }
 
-    /// <summary>讀取目前所有檔案總管分頁，並組成快照。必須只在同一個執行緒上使用。</summary>
+    /// <summary>Reads every File Explorer tab and builds a snapshot. Use from one thread only.</summary>
     class ShellReader
     {
         object shell;
@@ -50,7 +50,7 @@ namespace ExplorerSession
                     e.Id = Native.TabHandle(o);
                     list.Add(e);
                 }
-                catch { }   // 正在關閉的分頁會丟例外，略過
+                catch { }   // a tab that is closing throws; skip it
             }
             return list;
         }
@@ -84,8 +84,8 @@ namespace ExplorerSession
         }
 
         /// <summary>
-        /// 依畫面上的分頁標籤順序排列（名稱對不上的放最後、維持原順序），並找出選中的分頁。
-        /// 選中的分頁只能從 UIA 判斷：每個分頁的 ShellTabWindowClass 都回報 visible。
+        /// Orders tabs as they appear on screen (unmatched names go last, in their original order) and finds the selected tab.
+        /// The selected tab can only be read through UI Automation: every tab's ShellTabWindowClass reports visible.
         /// </summary>
         static List<TabState> VisualOrder(long top, List<TabState> tabs, out TabState selected)
         {
@@ -119,7 +119,7 @@ namespace ExplorerSession
         public static List<AutomationElement> TabItems(long top)
         {
             var root = AutomationElement.FromHandle(new IntPtr(top));
-            // 分頁列在標題列裡；只往下找 Tab 控制項，避免走進檔案清單（大型資料夾會很慢）
+            // Tabs live in the title bar; find the Tab control first so we never walk the file list (slow in large folders)
             var tab = root.FindFirst(TreeScope.Descendants, new PropertyCondition(AutomationElement.ControlTypeProperty, ControlType.Tab));
             if (tab == null) return new List<AutomationElement>();
             return tab.FindAll(TreeScope.Descendants, new PropertyCondition(AutomationElement.ControlTypeProperty, ControlType.TabItem))
